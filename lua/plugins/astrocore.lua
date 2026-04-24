@@ -36,6 +36,7 @@ return {
     mappings = {
       n = {
         ["<Leader>W"] = { desc = "Writing" },
+        ["<Leader>Wt"] = { desc = "Translate" },
       },
     },
   },
