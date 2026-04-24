@@ -9,6 +9,8 @@ return {
         "vale-ls",
         "vale",
         "marksman",
+        "stylua",
+        "selene",
       })
       return opts
     end,

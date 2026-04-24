@@ -25,9 +25,7 @@ local files = {
 
 for _, name in ipairs(files) do
   local ok, spec = pcall(require, "plugins.writing." .. name)
-  if ok and spec then
-    table.insert(M, spec)
-  end
+  if ok and spec then table.insert(M, spec) end
 end
 
 return M

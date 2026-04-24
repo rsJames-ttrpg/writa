@@ -10,8 +10,6 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.breakindent = true
     vim.opt_local.conceallevel = 2
     vim.opt_local.concealcursor = ""
-    if args.match == "fountain" then
-      vim.opt_local.textwidth = 80
-    end
+    if args.match == "fountain" then vim.opt_local.textwidth = 80 end
   end,
 })
