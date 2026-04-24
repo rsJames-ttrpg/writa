@@ -3,8 +3,8 @@
 Project types and scaffolding for writa. A user runs `:WritaNewProject novel`, answers a few prompts, and gets a directory tree pre-populated with chapters, characters, and other entities defined by a declarative YAML template. Once inside a project, `:WritaNewEntity scene` walks them through creating a new scene with typed prompts (including pickers for references to other entities, e.g., which chapter this scene belongs to).
 
 This is Spec 1 of a three-part plan:
-- **Spec 1 (this doc):** project types, scaffolding, entity creation
-- **Spec 2 (next):** dashboard / project manager UI — recent projects, switcher, "new project" card on the startup screen
+- **Spec 1 (this doc):** project types, scaffolding, entity creation, **minimal dashboard integration** (New/Open Project entries)
+- **Spec 2 (next):** richer project manager UX — recent-project MRU tracking, favorites, project search by title/description, per-project settings
 - **Spec 3 (deferred):** entity-relationship queries — Dataview-in-nvim territory, punted
 
 ## Goals
@@ -13,12 +13,13 @@ This is Spec 1 of a three-part plan:
 - Project types are declarative YAML — writers and non-Lua-users can author their own types.
 - Entity creation inside an existing project is prompt-driven, with pickers for references to other entities.
 - Plain-text everywhere; relationships stored as obsidian-style `[[wikilinks]]` so `obsidian.nvim`'s backlinks work without additional indexing.
+- The writa dashboard exposes **New Project** and **Open Project** entries so the experience matches familiar project-management plugins — users don't have to remember commands.
 - Structure the code so the whole subsystem can be extracted to a standalone plugin (`writa-projects.nvim`) later with `git mv`.
 
 ## Non-goals
 
 - No relationship queries ("show me all scenes featuring Jack"). That's Spec 3.
-- No project manager UI (picker, recent projects, dashboard integration). That's Spec 2.
+- No MRU tracking, favorites, or search across project metadata. The Open-Project picker lists all discovered projects unfiltered; richer UX is Spec 2.
 - No hierarchical directory layout. Entities are flat at the project root; relationships are expressed via frontmatter links, not directory nesting.
 - No Lua templates. A future `pre_scaffold.lua` / `post_scaffold.lua` hook is plausible for power users but not in MVP.
 - No automatic migrations when a type definition changes. Types are authored, not versioned per-project.
@@ -197,6 +198,15 @@ Derivation from the source value:
 9. For each entry in `initial[]`: run the entity creation flow with `values` pre-filled. Missing required fields are still prompted for.
 10. Open the first `initial` entity's file (or `README.md` if no initial entities).
 
+### `:WritaOpenProject`
+
+1. For each root in `project_roots` (default `{ "~/writing" }`, configurable), glob `**/.writa-project.yaml` — bounded depth 4 to avoid pathological deep scans.
+2. Parse each marker file's `title`, `type`, `description`.
+3. Present via `vim.ui.select` as "Title (type) — path". AstroNvim's UI config picks telescope or snacks automatically.
+4. On selection: `:cd` to the project directory, open `README.md` if present, else the first `initial[]` entity's file.
+
+Results are cached per-session keyed on mtime of each marker file. No persistent registry — Spec 2 adds that.
+
 ### `:WritaNewEntity [kind]`
 
 1. Walk up from cwd to find `.writa-project.yaml`. Error if not inside a project.
@@ -245,9 +255,10 @@ All implementation at `~/.config/writa/lua/plugins/writing/projects/`:
 
 ```
 lua/plugins/writing/projects/
-├── init.lua       # plugin spec + :WritaNewProject / :WritaNewEntity user commands
+├── init.lua       # plugin spec + :WritaNewProject / :WritaOpenProject / :WritaNewEntity user commands
 ├── loader.lua     # read project-types/ dir, parse YAML, validate against schema
 ├── scaffold.lua   # :WritaNewProject flow — mkdir, root_files, initial entities
+├── open.lua       # :WritaOpenProject flow — discovery scan, picker, cd + open
 ├── entity.lua     # :WritaNewEntity flow — prompts, pickers, file write
 ├── format.lua     # variable + format-spec interpolation
 ├── refs.lua       # wikilink generation from picker values
@@ -255,6 +266,22 @@ lua/plugins/writing/projects/
 ```
 
 Each module has a single responsibility and a small public interface. The writing/ aggregator gets one new `"projects"` entry.
+
+### Dashboard integration
+
+The existing `lua/plugins/dashboard.lua` (which already overrides the snacks header) is extended to add two keymap entries under the dashboard's `keys` section:
+
+```lua
+keys = {
+  { icon = " ", key = "w", desc = "New Project",   action = ":WritaNewProject" },
+  { icon = " ", key = "W", desc = "Open Project",  action = ":WritaOpenProject" },
+  -- ... existing entries preserved
+},
+```
+
+Keys chosen: lowercase `w` (new) and uppercase `W` (open), so muscle-memory pairs them. Icons are nerd-font glyphs that render in the user's Hack Nerd Font setup. Placement: directly under `Find File` / `New File` so project actions sit at the top of the dashboard key list, above config/utility entries.
+
+Existing snacks dashboard defaults (Find File, New File, Recent Files, Find Text, Config, Sessions, Lazy, Quit) are preserved by mutating the list, not replacing it.
 
 YAML parsing: depend on a pure-Lua YAML library (e.g., `FutureGap/yaml.nvim` or equivalent — exact pick deferred to implementation). Avoids a system-level `yq` dependency.
 
@@ -276,7 +303,7 @@ Three project types ship with writa:
 
 ## Deferred for a future spec
 
-- **Spec 2:** dashboard "New project" and "Open recent" entries; project switcher via telescope; recent-projects registry at `~/.local/state/writa/projects.json`.
+- **Spec 2:** MRU tracking (`~/.local/state/writa/projects.json`); "Recent Projects" section on the dashboard above the "Open Project" entry; project search by title/description substring; favorites/pinning; per-project settings overlay (`.writa-project.yaml` extended fields).
 - **Spec 3:** relationship queries — a `:WritaEntitiesOf` picker, Dataview-style cross-entity queries, timeline views.
 - Post-scaffold Lua hooks (`post_scaffold.lua`) — YAGNI until a real use case shows up.
 - Project-type versioning / migration — assume writers don't need this for now.
@@ -294,5 +321,6 @@ Three project types ship with writa:
 - `:WritaNewProject novel` produces a complete, opened project in under a second (excluding human prompt time).
 - Running `:WritaNewEntity scene` in that project, choosing "Opening" as the title, picking the chapter and characters from the picker, produces a valid scene file with frontmatter linking back to those entities.
 - The same set of actions works identically for `screenplay` and `essay` types.
+- The writa dashboard shows **New Project** and **Open Project** entries; pressing `w` from the dashboard starts a new project; pressing `W` lists existing projects discovered in `~/writing/`.
 - Zero system-level dependencies beyond what writa already requires.
 - A writer can author a new `thesis.yaml` project type with a `templates/` folder beside it and it shows up in the `:WritaNewProject` picker without any Lua edits or plugin restart.
