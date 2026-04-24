@@ -8,7 +8,6 @@ return {
       "markdown_inline",
       "latex",
       "bibtex",
-      "org",
       "yaml",
       "toml",
     })
