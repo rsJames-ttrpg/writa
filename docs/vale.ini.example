@@ -1,0 +1,7 @@
+StylesPath = ~/.local/share/vale/styles
+MinAlertLevel = suggestion
+
+Packages = proselint
+
+[*.{md,mdx}]
+BasedOnStyles = Vale, proselint
