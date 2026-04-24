@@ -50,6 +50,7 @@
   "undotree": { "branch": "master", "commit": "6fa6b57cda8459e1e4b2ca34df702f55242f4e4d" },
   "vim-fountain": { "branch": "master", "commit": "4464261ce6f173e5c2dab54b34a2860102c27d25" },
   "vim-pencil": { "branch": "master", "commit": "6d70438a8886eaf933c38a7a43a61adb0a7815ed" },
+  "vimtex": { "branch": "master", "commit": "0f42a5130432d4af2e6fd21fb93a76915ff1f090" },
   "which-key.nvim": { "branch": "main", "commit": "fcbf4eea17cb299c02557d576f0d568878e354a4" },
   "zen-mode.nvim": { "branch": "main", "commit": "8564ce6d29ec7554eb9df578efa882d33b3c23a7" }
 }
