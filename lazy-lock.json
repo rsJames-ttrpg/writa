@@ -47,6 +47,7 @@
   "resession.nvim": { "branch": "master", "commit": "cc819b0489938d03e4f3532a583354f0287c015b" },
   "smart-splits.nvim": { "branch": "master", "commit": "0bd02161ee5c5378bf4133fcedf53d1fc4179e1d" },
   "snacks.nvim": { "branch": "main", "commit": "e6fd58c82f2f3fcddd3fe81703d47d6d48fc7b9f" },
+  "thesaurus_query.vim": { "branch": "master", "commit": "92be7e003236f4d43b86ad1b84d092fceb982ed4" },
   "todo-comments.nvim": { "branch": "main", "commit": "31e3c38ce9b29781e4422fc0322eb0a21f4e8668" },
   "toggleterm.nvim": { "branch": "main", "commit": "50ea089fc548917cc3cc16b46a8211833b9e3c7c" },
   "translate.nvim": { "branch": "main", "commit": "1a841e56407ba02e919ed9af573dbe531404aebb" },
