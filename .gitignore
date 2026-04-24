@@ -1,0 +1,4 @@
+# lazy.nvim state
+/lazy-lock.json.bak
+# editor swap
+*.swp
