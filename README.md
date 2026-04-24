@@ -1,34 +1,53 @@
-# AstroNvim Template
+# writa
 
-**NOTE:** This is for AstroNvim v6+
+A Neovim configuration for writing — prose, screenwriting, Markdown notes, LaTeX.
 
-A template for getting started with [AstroNvim](https://github.com/AstroNvim/AstroNvim)
+Based on [AstroNvim](https://astronvim.com/). Run via:
 
-## 🛠️ Installation
+    NVIM_APPNAME=writa nvim
 
-#### Make a backup of your current nvim and shared folder
+Recommended alias (zsh/bash):
 
-```shell
-mv ~/.config/nvim ~/.config/nvim.bak
-mv ~/.local/share/nvim ~/.local/share/nvim.bak
-mv ~/.local/state/nvim ~/.local/state/nvim.bak
-mv ~/.cache/nvim ~/.cache/nvim.bak
-```
+    alias writa='NVIM_APPNAME=writa nvim'
 
-#### Create a new user repository from this template
+## Layout
 
-Press the "Use this template" button above to create a new repository to store your user configuration.
+- `lua/plugins/` — overrides for the AstroNvim base (astrocore, astrolsp, mason, treesitter).
+- `lua/plugins/writing/` — writer-specific plugin layer. Future extraction target for an `astrocommunity.writing` pack.
+- `lua/polish.lua` — writing-mode autocmd (spell, soft-wrap, conceal).
+- `docs/specs/` — design docs.
+- `docs/plans/` — implementation plans.
+- `docs/vale.ini.example` — template for `~/.vale.ini`.
 
-You can also just clone this repository directly if you do not want to track your user configuration in GitHub.
+## Keymaps
 
-#### Clone the repository
+All writing features live under the `<Leader>W` prefix. Press `<space>W` in normal mode for the full menu (which-key shows it).
 
-```shell
-git clone https://github.com/<your_user>/<your_repository> ~/.config/nvim
-```
+| Keymap | Action |
+|---|---|
+| `<Leader>Wz` | Zen mode toggle |
+| `<Leader>Wo` | Obsidian quick switch |
+| `<Leader>Wn` | Obsidian new note |
+| `<Leader>Wd` | Obsidian today |
+| `<Leader>Wb` | Obsidian backlinks |
+| `<Leader>Wm` | Markdown preview toggle |
+| `<Leader>Wi` | Paste clipboard image |
+| `<Leader>Ws` | Thesaurus: replace word |
+| `<Leader>Wu` | Toggle undotree |
+| `<Leader>Wp` / `<Leader>WP` | Pomodoro start (25m) / stop |
+| `<Leader>Wtf` / `<Leader>Wte` | Translate → French / English |
+| `<Leader>Wg` | Gen (local LLM via Ollama) |
 
-#### Start Neovim
+## Requirements
 
-```shell
-nvim
-```
+- Neovim ≥ 0.10
+- `yarn` (for markdown-preview.nvim build)
+- `latexmk` + TeX Live (for vimtex) — `sudo pacman -S texlive-basic texlive-binextra texlive-latexrecommended`
+- `zathura` (PDF viewer configured in vimtex) — `sudo pacman -S zathura zathura-pdf-mupdf`
+- `~/.vale.ini` — copy from `docs/vale.ini.example`
+- Self-hosted LanguageTool reachable at the URL in `lua/plugins/astrolsp.lua` (default `https://languagetool.home.lan`)
+- Optional: Ollama running locally for `<Leader>Wg` (gen.nvim); model name configured in `lua/plugins/writing/gen.lua`
+
+## Credits
+
+Successor to [OVIWrite](https://github.com/MiragianCycle/OVIWrite). Built on [AstroNvim](https://astronvim.com/) with a curated writing plugin layer.
