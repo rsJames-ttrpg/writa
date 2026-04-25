@@ -59,13 +59,11 @@ function M.run(roots)
     format_item = M.format_choice,
   }, function(choice)
     if not choice then return end
-    vim.cmd.cd(vim.fn.fnameescape(choice.path))
+    vim.api.nvim_set_current_dir(choice.path)
     local readme = choice.path .. "/README.md"
-    if vim.fn.filereadable(readme) == 1 then
-      vim.cmd.edit(vim.fn.fnameescape(readme))
-    else
-      vim.cmd.edit(vim.fn.fnameescape(choice.path))
-    end
+    local target = vim.fn.filereadable(readme) == 1 and readme or choice.path
+    vim.cmd("edit " .. vim.fn.fnameescape(target))
+    vim.notify(("writa-projects: opened %s"):format(choice.title), vim.log.levels.INFO)
   end)
 end
 
