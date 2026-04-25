@@ -21,6 +21,7 @@ local files = {
   "cmp-dictionary",
   "noice",
   "gen",
+  "projects",
 }
 
 for _, name in ipairs(files) do
