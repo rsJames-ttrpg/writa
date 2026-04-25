@@ -1,0 +1,5 @@
+describe("sanity", function()
+  it("plenary loads and assertions work", function()
+    assert.are.equal(2, 1 + 1)
+  end)
+end)
