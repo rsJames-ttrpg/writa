@@ -1,40 +1,7 @@
 local format = require("plugins.writing.projects.format")
-local refs = require("plugins.writing.projects.refs")
 local slug_mod = require("plugins.writing.projects.slug")
 
 local M = {}
-
--- Default 5-minute timeout. The user can take their time picking.
-local UI_TIMEOUT_MS = 5 * 60 * 1000
-local UI_POLL_MS = 50
-
----Synchronous wrapper around vim.ui.input. Blocks the main loop while still
----servicing UI events, so async pickers (snacks/telescope/dressing) render + respond.
----@param opts table
----@return string?
-local function ui_input(opts)
-  local done, result = false, nil
-  vim.ui.input(opts, function(v)
-    result = v
-    done = true
-  end)
-  vim.wait(UI_TIMEOUT_MS, function() return done end, UI_POLL_MS)
-  return result
-end
-
----Synchronous wrapper around vim.ui.select.
----@param items any[]
----@param opts table
----@return any
-local function ui_select(items, opts)
-  local done, result = false, nil
-  vim.ui.select(items, opts, function(choice)
-    result = choice
-    done = true
-  end)
-  vim.wait(UI_TIMEOUT_MS, function() return done end, UI_POLL_MS)
-  return result
-end
 
 local function emit_scalar(k, v)
   if type(v) == "number" or type(v) == "boolean" then
@@ -86,109 +53,18 @@ function M.glob_for_filename(filename_template)
   return (filename_template:gsub("{[^{}]*}", "*"))
 end
 
-local function pick(items, prompt)
-  return ui_select(items, { prompt = prompt })
-end
-
-local function multi_pick(items, prompt)
-  local picked = {}
-  while true do
-    local remaining = {}
-    for _, it in ipairs(items) do
-      local already = false
-      for _, p in ipairs(picked) do if p == it then already = true; break end end
-      if not already then table.insert(remaining, it) end
-    end
-    if #remaining == 0 then break end
-    table.insert(remaining, 1, "<done>")
-    local choice = pick(remaining, prompt)
-    if not choice or choice == "<done>" then break end
-    table.insert(picked, choice)
-  end
-  return picked
-end
-
-local function prompt_field(field, ctx)
-  local function input(prompt)
-    return ui_input({ prompt = prompt })
-  end
-
-  if field.type == "string" then
-    return input(field.name .. (field.required and " (required): " or ": "))
-  end
-
-  if field.type == "int" then
-    local raw = input(field.name .. ": ")
-    if raw == nil or raw == "" then return nil end
-    local n = tonumber(raw)
-    if not n then error(("entity: %q expected int, got %q"):format(field.name, raw)) end
-    return n
-  end
-
-  if field.type == "list" then
-    local raw = input(field.name .. " (comma-separated): ")
-    if raw == nil or raw == "" then return nil end
-    local out = {}
-    for s in raw:gmatch("[^,]+") do
-      table.insert(out, vim.trim(s))
-    end
-    return out
-  end
-
-  local ref_kind = field.type:match("^ref%(([%w_]+)%)$")
-  if ref_kind then
-    local glob_template = ctx.type_def.entities[ref_kind].filename
-    local glob = M.glob_for_filename(glob_template)
-    local matches = vim.fn.glob(ctx.project_root .. "/" .. glob, false, true)
-    local relpaths = {}
-    for _, abs in ipairs(matches) do
-      table.insert(relpaths, abs:sub(#ctx.project_root + 2))
-    end
-    if #relpaths == 0 then
-      vim.notify(("no %s entities exist yet — skipping ref"):format(ref_kind))
-      return nil
-    end
-    local picked = pick(relpaths, ("%s (%s): "):format(field.name, ref_kind))
-    return picked and refs.to_wikilink(picked) or nil
-  end
-
-  local list_kind = field.type:match("^list%(([%w_]+)%)$")
-  if list_kind then
-    local glob_template = ctx.type_def.entities[list_kind].filename
-    local glob = M.glob_for_filename(glob_template)
-    local matches = vim.fn.glob(ctx.project_root .. "/" .. glob, false, true)
-    local relpaths = {}
-    for _, abs in ipairs(matches) do
-      table.insert(relpaths, abs:sub(#ctx.project_root + 2))
-    end
-    if #relpaths == 0 then return {} end
-    local picked = multi_pick(relpaths, ("%s (%s): "):format(field.name, list_kind))
-    local out = {}
-    for _, p in ipairs(picked) do table.insert(out, refs.to_wikilink(p)) end
-    return out
-  end
-
-  error(("entity: unknown field type %q"):format(field.type))
-end
-
----Create one entity file. Uses vim.ui only for fields not in `values`.
----@param opts { project_root: string, project_meta: table, entity_def: table,
----              type_def: table?, values: table?, open_after: boolean? }
+---Create one entity file from fully-resolved field values.
+---No UI prompting — the caller must collect values via continuation-chain
+---before invoking this. Required fields missing from `values` are an error.
+---@param opts { project_root: string, project_meta: table, entity_def: table, values: table, open_after: boolean? }
 ---@return { path: string }
 function M.create(opts)
   local def = opts.entity_def
   local values = vim.deepcopy(opts.values or {})
 
   for _, field in ipairs(def.fields) do
-    if values[field.name] == nil then
-      local v = prompt_field(field, {
-        project_root = opts.project_root,
-        type_def = opts.type_def or { entities = { __dummy__ = def } },
-      })
-      if field.required and (v == nil or v == "") then
-        error(("entity: required field %q not provided"):format(field.name))
-      end
-      if v ~= nil and v ~= "" then values[field.name] = v end
+    if field.required and (values[field.name] == nil or values[field.name] == "") then
+      error(("entity: required field %q not provided"):format(field.name))
     end
   end
 
@@ -199,6 +75,9 @@ function M.create(opts)
   local slug = slug_mod.derive(tostring(values[source_field]))
 
   local ctx = vim.tbl_extend("force", {}, values)
+  for _, field in ipairs(def.fields) do
+    if ctx[field.name] == nil then ctx[field.name] = "" end
+  end
   ctx.slug = slug
   ctx["project.title"]       = opts.project_meta.title
   ctx["project.slug"]        = slug_mod.derive(opts.project_meta.title or "")
