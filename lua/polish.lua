@@ -1,3 +1,12 @@
+-- Silence AstroLSP's hover/signature deprecation warnings on LSP attach.
+-- These are upstream compat-shim noise; remove this block once AstroLSP
+-- stops calling the pre-Nvim-0.11 signatures.
+local _deprecate = vim.deprecate
+vim.deprecate = function(name, ...)
+  if name == "vim.lsp.buf.hover" or name == "vim.lsp.buf.signature_help" then return end
+  return _deprecate(name, ...)
+end
+
 local group = vim.api.nvim_create_augroup("writa_writing_mode", { clear = true })
 
 vim.api.nvim_create_autocmd("FileType", {
