@@ -4,6 +4,38 @@ local slug_mod = require("plugins.writing.projects.slug")
 
 local M = {}
 
+-- Default 5-minute timeout. The user can take their time picking.
+local UI_TIMEOUT_MS = 5 * 60 * 1000
+local UI_POLL_MS = 50
+
+---Synchronous wrapper around vim.ui.input. Blocks the main loop while still
+---servicing UI events, so async pickers (snacks/telescope/dressing) render + respond.
+---@param opts table
+---@return string?
+local function ui_input(opts)
+  local done, result = false, nil
+  vim.ui.input(opts, function(v)
+    result = v
+    done = true
+  end)
+  vim.wait(UI_TIMEOUT_MS, function() return done end, UI_POLL_MS)
+  return result
+end
+
+---Synchronous wrapper around vim.ui.select.
+---@param items any[]
+---@param opts table
+---@return any
+local function ui_select(items, opts)
+  local done, result = false, nil
+  vim.ui.select(items, opts, function(choice)
+    result = choice
+    done = true
+  end)
+  vim.wait(UI_TIMEOUT_MS, function() return done end, UI_POLL_MS)
+  return result
+end
+
 local function emit_scalar(k, v)
   if type(v) == "number" or type(v) == "boolean" then
     return ("%s: %s"):format(k, tostring(v))
@@ -55,9 +87,7 @@ function M.glob_for_filename(filename_template)
 end
 
 local function pick(items, prompt)
-  local result
-  vim.ui.select(items, { prompt = prompt }, function(choice) result = choice end)
-  return result
+  return ui_select(items, { prompt = prompt })
 end
 
 local function multi_pick(items, prompt)
@@ -80,9 +110,7 @@ end
 
 local function prompt_field(field, ctx)
   local function input(prompt)
-    local result
-    vim.ui.input({ prompt = prompt }, function(v) result = v end)
-    return result
+    return ui_input({ prompt = prompt })
   end
 
   if field.type == "string" then

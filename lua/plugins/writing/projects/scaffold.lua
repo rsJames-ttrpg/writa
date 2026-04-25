@@ -2,6 +2,14 @@ local entity = require("plugins.writing.projects.entity")
 local format = require("plugins.writing.projects.format")
 local slug_mod = require("plugins.writing.projects.slug")
 
+local function yaml_quote_if_needed(s)
+  if type(s) ~= "string" then return tostring(s) end
+  if s:match("[:%[%]{}!&*%%@`#]") or s:match("^%s") or s:match("%s$") or s:match("\n") then
+    return ("%q"):format(s)
+  end
+  return s
+end
+
 local M = {}
 
 local function dir_is_nonempty(path)
@@ -35,8 +43,8 @@ function M.create(opts)
   -- Marker file
   local marker_lines = {
     ("type: %s"):format(opts.type_loaded.name),
-    ("title: %s"):format(opts.title),
-    ("description: %s"):format(description),
+    ("title: %s"):format(yaml_quote_if_needed(opts.title)),
+    ("description: %s"):format(yaml_quote_if_needed(description)),
     ("created: %s"):format(os.date("%Y-%m-%d")),
   }
   vim.fn.writefile(marker_lines, target .. "/.writa-project.yaml")

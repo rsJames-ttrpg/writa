@@ -70,6 +70,27 @@ describe("scaffold.create", function()
     assert.is_truthy(marker:match("title: My Project"))
   end)
 
+  it("preserves a title with YAML special characters in the marker file", function()
+    if vim.fn.executable(vim.fn.stdpath("data") .. "/mason/bin/yq") ~= 1 then
+      return pending("yq not installed")
+    end
+
+    local loader = require("plugins.writing.projects.loader")
+    local def = loader.load_type(type_dir)
+    local target = tmpdir .. "/projects/colon-test"
+    scaffold.create({
+      type_loaded = def,
+      title = "My Book: A Novel",
+      description = "First-person story",
+      target_path = target,
+      open_after = false,
+    })
+
+    local marker = loader.read_marker(target .. "/.writa-project.yaml")
+    assert.are.equal("My Book: A Novel", marker.title)
+    assert.are.equal("First-person story", marker.description)
+  end)
+
   it("errors when target exists and is non-empty (without confirm flag)", function()
     if vim.fn.executable(vim.fn.stdpath("data") .. "/mason/bin/yq") ~= 1 then
       return pending("yq not installed")
