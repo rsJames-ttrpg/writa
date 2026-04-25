@@ -1,8 +1,8 @@
 ---@type LazySpec
 return {
-  "folke/snacks.nvim", -- already loaded; we hang our commands off this no-op dep
-  lazy = false,         -- we want :WritaOpenProject available before any file is opened
-  config = function()
+  "folke/snacks.nvim", -- already loaded; we attach via init (additive) so we
+  lazy = false,        -- don't replace AstroNvim's snacks config function
+  init = function()
     local config_dir   = vim.fn.stdpath("config")
     local types_root   = config_dir .. "/project-types"
     local project_roots = { vim.fn.expand("~/writing") }
