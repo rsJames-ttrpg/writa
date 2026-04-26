@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=file:///home/jackm/.config/writa/schema/project-type/v1.json
+
+name: Novel
+description: Long-form prose fiction
+default_path: ~/writing/novels/{slug}
+
+directories: [chapters, scenes, characters, locations, research]
+
+root_files:
+  - { path: README.md,  template: templates/README.md }
+  - { path: outline.md, template: templates/outline.md }
+
+entities:
+  chapter:
+    filename: "chapters/{number:02d}-{slug}.md"
+    template: templates/chapter.md
+    fields:
+      - { name: number, type: int,    required: true }
+      - { name: title,  type: string, required: true }
+      - { name: pov,    type: "ref(character)" }
+
+  scene:
+    filename: "scenes/{slug}.md"
+    template: templates/scene.md
+    fields:
+      - { name: title,      type: string,                  required: true }
+      - { name: chapter,    type: "ref(chapter)",          required: true }
+      - { name: characters, type: "list(character)" }
+      - { name: location,   type: "ref(location)" }
+      - { name: summary,    type: string }
+
+  character:
+    filename: "characters/{slug}.md"
+    template: templates/character.md
+    fields:
+      - { name: name,         type: string, required: true }
+      - { name: role,         type: string }
+      - { name: age,          type: int }
+      - { name: description,  type: string }
+
+  location:
+    filename: "locations/{slug}.md"
+    template: templates/location.md
+    fields:
+      - { name: name,        type: string, required: true }
+      - { name: description, type: string }
+
+initial:
+  - { entity: chapter,   values: { number: 1, title: "Chapter 1" } }
+  - { entity: character, values: { name: "Protagonist" } }

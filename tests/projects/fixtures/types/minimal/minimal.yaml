@@ -1,0 +1,12 @@
+name: Minimal
+description: Smallest valid project type for tests
+default_path: /tmp/writa-test-{slug}
+directories: [notes]
+root_files: []
+entities:
+  note:
+    filename: "notes/{slug}.md"
+    template: templates/note.md
+    fields:
+      - { name: title, type: string, required: true }
+initial: []

@@ -28,6 +28,18 @@ return {
       marksman = {
         filetypes = { "markdown" },
       },
+      yamlls = {
+        settings = {
+          yaml = {
+            schemas = {
+              [vim.fn.stdpath("config") .. "/schema/project-type/v1.json"] = {
+                "project-types/**/*.yaml",
+                ".writa-project.yaml",
+              },
+            },
+          },
+        },
+      },
     },
   },
 }

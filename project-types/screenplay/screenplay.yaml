@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=file:///home/jackm/.config/writa/schema/project-type/v1.json
+
+name: Screenplay
+description: Fountain-based long-form drama
+default_path: ~/writing/screenplays/{slug}
+
+directories: [acts, scenes, characters, locations, research]
+
+root_files:
+  - { path: README.md, template: templates/README.md }
+
+entities:
+  screenplay:
+    filename: "screenplay.md"
+    template: templates/screenplay.md
+    fields:
+      - { name: title,     type: string,             required: true }
+      - { name: logline,   type: string }
+      - { name: genre,     type: string }
+      - { name: main_cast, type: "list(character)" }
+
+  act:
+    filename: "acts/{number:02d}-{slug}.md"
+    template: templates/act.md
+    fields:
+      - { name: number,     type: int,               required: true }
+      - { name: title,      type: string,            required: true }
+      - { name: summary,    type: string }
+      - { name: screenplay, type: "ref(screenplay)" }
+
+  scene:
+    filename: "scenes/{slug}.fountain"
+    template: templates/scene.fountain
+    fields:
+      - { name: title,         type: string,                 required: true }
+      - { name: slug_line,     type: string,                 required: true }
+      - { name: act,           type: "ref(act)",             required: true }
+      - { name: location,      type: "ref(location)" }
+      - { name: characters,    type: "list(character)" }
+      - { name: summary,       type: string }
+      - { name: beat,          type: string }
+      - { name: subtext,       type: string }
+
+  character:
+    filename: "characters/{slug}.md"
+    template: templates/character.md
+    fields:
+      - { name: name,        type: string, required: true }
+      - { name: archetype,   type: string }
+      - { name: age,         type: int }
+      - { name: description, type: string }
+
+  location:
+    filename: "locations/{slug}.md"
+    template: templates/location.md
+    fields:
+      - { name: name,        type: string, required: true }
+      - { name: description, type: string }
+
+initial:
+  - { entity: screenplay, values: { title: "Untitled Screenplay" } }
+  - { entity: act,        values: { number: 1, title: "Act 1" } }
+  - { entity: act,        values: { number: 2, title: "Act 2" } }
+  - { entity: act,        values: { number: 3, title: "Act 3" } }

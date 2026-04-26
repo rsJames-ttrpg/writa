@@ -289,11 +289,41 @@ Schema validation: the JSON schema at `schema/project-type/v1.json` (shipped in 
 
 ## MVP content — what ships day one
 
-Three project types ship with writa:
+Three project types ship with writa.
 
-1. **novel** — prose fiction; entities: chapter, scene, character, location. Directories: chapters, scenes, characters, locations, research.
-2. **screenplay** — Fountain-based; entities: script (single `.fountain` file), scene, character, location. Directories: scripts, scenes, characters, locations, research. `scripts/{slug}.fountain` is the main writing target; scenes and characters are planning aids.
-3. **essay** — single-file longform non-fiction; entities: draft, source. Directories: drafts, sources, notes. `drafts/{version}-{slug}.md` as the main file, sources are citations.
+### novel
+
+Long-form prose fiction.
+
+- Entity types: `chapter`, `scene`, `character`, `location`.
+- Directories: `chapters`, `scenes`, `characters`, `locations`, `research`.
+- `scene.chapter` is `ref(chapter)`; `scene.characters` is `list(character)`; `scene.location` is `ref(location)`.
+
+### screenplay
+
+Fountain-based long-form drama.
+
+- Entity types: `screenplay`, `act`, `scene`, `character`, `location`.
+- `screenplay` is a singleton at scaffold time — holds title page metadata (title, logline, genre, list(character) main_cast). One per project.
+- `act` — number, title, summary, `ref(screenplay)`. Default scaffold seeds three acts.
+- `scene` — `slug_line` (e.g. `INT. KITCHEN — NIGHT`), summary, beat (string), subtext (string), `ref(act)`, `list(character)` present, `ref(location)`. Body is `.fountain`.
+- `character` — name, archetype, age, description.
+- `location` — name, description.
+- Action lines, dialogue, parentheticals, transitions, V.O./O.S. markers are Fountain syntax inside the scene file, **not** separate entities.
+- Sequence (the pro-level grouping between act and scene) is intentionally deferred — adding it later is non-breaking.
+- Directories: `acts`, `scenes`, `characters`, `locations`, `research`.
+
+### essay
+
+Argumentative non-fiction.
+
+- Entity types: `essay`, `argument`, `citation`.
+- `essay` is the singleton document — title, thesis, introduction, conclusion. Body of `essay.md` has the intro/body/conclusion sections.
+- `argument` — topic_sentence, supporting_evidence (string), counterargument (string), `ref(essay)`, `list(citation)` evidence.
+- `citation` — author, year (int), title, url, quote.
+- Counterargument is a field on `argument`, not its own entity type.
+- Bibliography is rendered from `list(citation)` at export time — not a stored entity or file.
+- Directories: `arguments`, `citations`.
 
 ## Integration with existing writa features
 

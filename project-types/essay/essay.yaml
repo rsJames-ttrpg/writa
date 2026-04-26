@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=file:///home/jackm/.config/writa/schema/project-type/v1.json
+
+name: Essay
+description: Argumentative non-fiction
+default_path: ~/writing/essays/{slug}
+
+directories: [arguments, citations]
+
+root_files:
+  - { path: README.md, template: templates/README.md }
+
+entities:
+  essay:
+    filename: "essay.md"
+    template: templates/essay.md
+    fields:
+      - { name: title,        type: string, required: true }
+      - { name: thesis,       type: string }
+      - { name: introduction, type: string }
+      - { name: conclusion,   type: string }
+
+  argument:
+    filename: "arguments/{slug}.md"
+    template: templates/argument.md
+    fields:
+      - { name: topic_sentence,      type: string,                required: true }
+      - { name: supporting_evidence, type: string }
+      - { name: counterargument,     type: string }
+      - { name: essay,               type: "ref(essay)" }
+      - { name: evidence,            type: "list(citation)" }
+
+  citation:
+    filename: "citations/{slug}.md"
+    template: templates/citation.md
+    fields:
+      - { name: title,  type: string, required: true }
+      - { name: author, type: string }
+      - { name: year,   type: int }
+      - { name: url,    type: string }
+      - { name: quote,  type: string }
+
+initial:
+  - { entity: essay, values: { title: "Untitled Essay" } }

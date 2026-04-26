@@ -34,9 +34,16 @@ All writing features live under the `<Leader>W` prefix. Press `<space>W` in norm
 | `<Leader>Wi` | Paste clipboard image |
 | `<Leader>Ws` | Thesaurus: replace word |
 | `<Leader>Wu` | Toggle undotree |
-| `<Leader>Wp` / `<Leader>WP` | Pomodoro start (25m) / stop |
+| `<Leader>WP` / `<Leader>WT` | Pomodoro start (25m) / stop |
 | `<Leader>Wtf` / `<Leader>Wte` | Translate → French / English |
 | `<Leader>Wg` | Gen (local LLM via Ollama) |
+
+## Projects
+
+writa includes a declarative project-scaffolding system for novels, screenplays, essays, and custom types. From the dashboard, press `w` to scaffold a new project (`:WritaNewProject`) or `W` to open an existing one (`:WritaOpenProject`). Inside a project, `:WritaNewEntity` adds chapters, scenes, characters, etc. with prompt-driven cross-references stored as `[[wikilinks]]`.
+
+- Full guide: [`docs/projects.md`](docs/projects.md)
+- Authoring custom project types: [`project-types/AUTHORING.md`](project-types/AUTHORING.md)
 
 ## Requirements
 

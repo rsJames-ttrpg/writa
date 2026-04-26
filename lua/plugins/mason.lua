@@ -11,6 +11,8 @@ return {
         "marksman",
         "stylua",
         "selene",
+        "yq",
+        "yaml-language-server",
       })
       return opts
     end,

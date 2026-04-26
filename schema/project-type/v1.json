@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://writa.dev/schema/project-type/v1.json",
+  "title": "writa project type",
+  "type": "object",
+  "required": ["name", "directories", "entities"],
+  "additionalProperties": false,
+  "properties": {
+    "name":         { "type": "string" },
+    "description":  { "type": "string" },
+    "default_path": { "type": "string" },
+    "directories": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "root_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "template"],
+        "additionalProperties": false,
+        "properties": {
+          "path":     { "type": "string" },
+          "template": { "type": "string" }
+        }
+      }
+    },
+    "entities": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["filename", "template", "fields"],
+        "additionalProperties": false,
+        "properties": {
+          "filename": { "type": "string" },
+          "template": { "type": "string" },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "type"],
+              "additionalProperties": false,
+              "properties": {
+                "name":     { "type": "string" },
+                "type": {
+                  "type": "string",
+                  "pattern": "^(string|int|list|ref\\([A-Za-z_]+\\)|list\\([A-Za-z_]+\\))$"
+                },
+                "required": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "initial": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entity"],
+        "additionalProperties": false,
+        "properties": {
+          "entity": { "type": "string" },
+          "values": { "type": "object" }
+        }
+      }
+    }
+  }
+}
