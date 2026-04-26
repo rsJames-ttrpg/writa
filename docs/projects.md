@@ -26,7 +26,15 @@ After scaffold: opens the first seeded entity, or `README.md` if none.
 
 ### `:WritaOpenProject`
 
-Discovers projects under configured roots (currently `~/writing/`, depth 4) by globbing for `.writa-project.yaml`, then presents them via `vim.ui.select` (snacks or telescope, whichever AstroNvim is configured to use). Selecting one `:cd`s into the project, opens its `README.md`, and notifies.
+Discovers projects under configured roots (default `~/writing/`, depth 4) by globbing for `.writa-project.yaml`, then presents them via `vim.ui.select` (snacks or telescope, whichever AstroNvim is configured to use). Selecting one `:cd`s into the project, opens its `README.md`, and notifies.
+
+To scan additional roots, set `opts.project_roots` on the spec in `lua/plugins/writing/projects/init.lua`:
+
+```lua
+opts = {
+  project_roots = { "~/writing", "~/Documents/writing" },
+},
+```
 
 ### `:WritaNewEntity [kind]`
 
@@ -51,16 +59,17 @@ The writa dashboard adds two entries above the snacks defaults:
 
 ## Discovery
 
-A project is any directory containing a `.writa-project.yaml` marker:
+A project is any directory containing a `.writa-project.yaml` marker. Discovery scans each root in `opts.project_roots` (default `~/writing/`) recursively to depth 4.
 
 ```yaml
+# .writa-project.yaml
 type: novel
 title: My Novel
 description: A first-person coming-of-age story.
 created: 2026-04-24
 ```
 
-`type` must match a directory name under `~/.config/writa/project-types/`. Discovery scans `~/writing/` recursively to depth 4.
+`type` must match a directory name under `~/.config/writa/project-types/`.
 
 ## Built-in project types
 
@@ -72,7 +81,6 @@ To add a custom type, see [`project-types/AUTHORING.md`](../project-types/AUTHOR
 
 ## Limitations
 
-- Discovery roots are hardcoded to `~/writing/`. Tracked in [`docs/backlog.md`](backlog.md).
 - No MRU, favorites, or search across projects (planned for Spec 2).
 - No relationship queries — relationships live as wikilinks; query via obsidian.nvim's backlinks for now.
 

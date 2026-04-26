@@ -1,11 +1,16 @@
 ---@type LazySpec
 return {
-  "folke/snacks.nvim", -- already loaded; we attach via init (additive) so we
-  lazy = false,        -- don't replace AstroNvim's snacks config function
-  init = function()
-    local config_dir   = vim.fn.stdpath("config")
-    local types_root   = config_dir .. "/project-types"
-    local project_roots = { vim.fn.expand("~/writing") }
+  dir   = vim.fn.stdpath("config") .. "/lua/plugins/writing/projects",
+  name  = "writa-projects",
+  lazy  = false,
+  opts  = {
+    -- Roots scanned by :WritaOpenProject. Tilde expansion handled downstream.
+    project_roots = { "~/writing" },
+  },
+  config = function(_, opts)
+    local config_dir    = vim.fn.stdpath("config")
+    local types_root    = config_dir .. "/project-types"
+    local project_roots = opts.project_roots
 
     local loader = require("plugins.writing.projects.loader")
 
