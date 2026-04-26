@@ -34,6 +34,7 @@ All writing features live under the `<Leader>W` prefix. Press `<space>W` in norm
 | `<Leader>Wi` | Paste clipboard image |
 | `<Leader>Ws` | Thesaurus: replace word |
 | `<Leader>Wu` | Toggle undotree |
+| `<Leader>WN` | New project entity (picks kind, then prompts) |
 | `<Leader>WP` / `<Leader>WT` | Pomodoro start (25m) / stop |
 | `<Leader>Wtf` / `<Leader>Wte` | Translate → French / English |
 | `<Leader>Wg` | Gen (local LLM via Ollama) |

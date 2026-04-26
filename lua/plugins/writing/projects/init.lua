@@ -3,6 +3,9 @@ return {
   dir   = vim.fn.stdpath("config") .. "/lua/plugins/writing/projects",
   name  = "writa-projects",
   lazy  = false,
+  keys  = {
+    { "<Leader>WN", "<cmd>WritaNewEntity<cr>", desc = "New entity" },
+  },
   opts  = {
     -- Roots scanned by :WritaOpenProject. Tilde expansion handled downstream.
     project_roots = { "~/writing" },
